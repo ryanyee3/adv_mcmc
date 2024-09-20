@@ -5,8 +5,8 @@
 # Dependencies: 
 
 ### hyperparameters ###
-lambda = sqrt(2)
-dim = 1
+lambda = 1
+dim = 10
 n_burn = 1000
 n_post = 10000
 
@@ -18,6 +18,7 @@ n_post = 10000
 x_init = runif(n = dim, min = -5, max = 5)
 
 x_samples = matrix(nrow = n_post, ncol = dim)
+n_accept = 0
 
 # MCMC loop
 x = x_init
@@ -30,10 +31,13 @@ for (it in 1:(n_burn + n_post)){
   # acceptance probability
   theta = (1 - (lambda^2 / 2) ) * x_star
   alpha_star = (prod(dnorm(x_star)) * prod(dnorm(x_star, mean = theta_star, sd = lambda))) / (prod(dnorm(x)) * prod(dnorm(x, mean = theta, sd = lambda)))
-  alpha = min(1, alpha_star)
+  alpha = min(1, alpha_star, na.rm = TRUE)
   
   # accept / reject
-  if (alpha >= runif(1)) x = x_star
+  if (alpha >= runif(1)){
+    x = x_star
+    if (it > n_burn) n_accept = n_accept + 1
+  }
   
   # save sample
   if (it > n_burn) x_samples[it - n_burn, ] = x
@@ -41,6 +45,8 @@ for (it in 1:(n_burn + n_post)){
 
 
 ### diagnostics ###
+n_accept / n_post # acceptance rate
+coda::effectiveSize(x_samples) # effective sample size
 mean(x_samples)
 sd(x_samples)
 
