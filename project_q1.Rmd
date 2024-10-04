@@ -145,7 +145,8 @@ data <- gen_data(500, 5)
 sim1 <- run_sim(y = data$y, data_mat = data$data_mat, m = 50000)
 s_probs <- get_sim_post_prob(sim1)
 #posterior prob
-s_probs
+s_probs %>%
+  mutate(prob = n / 50000)
 # true S (non zero)
 sort(data$coef_index)
 #looks like it works pretty well
@@ -155,7 +156,8 @@ data10 <- gen_data(1000, 10)
 sim10 <- run_sim(y = data10$y, data_mat = data10$data_mat, m = 50000)
 s_probs10 <- get_sim_post_prob(sim10)
 #posterior prob
-s_probs10
+s_probs10 %>%
+  mutate(prob = n / 50000)
 # true S (non zero)
 sort(data10$coef_index)
 ```
