@@ -10,6 +10,8 @@
 \usepackage{enumitem}
 \usepackage{tikz}
 \usepackage{bm, bbm}
+\usepackage{booktabs}
+\usepackage{caption}
 \usetikzlibrary{shapes.geometric, positioning}
 \usetikzlibrary{quotes, angles}
 \usepackage{rotating}
@@ -46,4 +48,79 @@ Parameters: $\lambda, d, \theta \in\mathbb{R}^{d}$
 \end{align}
 
 \section{MALA for Bayesian Logistic Regression}
+
+\subsection{Derivations}
+
+We first derive the MALA iteration for Bayesian Logistic Regression. 
+To do this, we derive two quantities: the gradient of the log of the target distribution, 
+and the acceptance ratio when used in the metropolis-hasting framework.
+
+\paragraph{Gradient Derivation.} 
+The target distribution in our example is the posterior distribution of $\beta \in \mathbb{R}^p$, conditional
+on observations $y_1,...,y_n \in \mathbb{R}$ following the model
+\begin{align}
+    y_i | \beta &\sim \text{Bern}(\left[ 1 + \exp(-x_i^\intercal \beta) \right]^{-1})\\
+    \beta &\sim \mathcal{N}(0, I).
+\end{align}
+The resulting log posterior likelihood is (up to a constant term independent of $\beta$)
+\begin{align} \label{p3-eq-log-posterior}
+    \log ( p(\beta | y_1,...,y_n) ) &= \sum_{i=1}^n \log( p(y_i | \beta)) + \log(p(\beta))\\
+    &= \left( 
+        \sum_{i=1}^n -y_i \log(1+\exp(-x_i^\intercal \beta)) 
+        + (1-y_i) \log\left( \frac{\exp(-x_i^\intercal\beta)}{1+\exp(-x_i^\intercal\beta)}\right) 
+        \right) - .5 ||\beta||_2^2\\
+    &= \sum_{i=1}^n -\log\left( 1+\exp(-x_i^\intercal\beta) \right) + (y_i-1)(x_i^\intercal \beta) - .5 ||\beta||_2^2. \\
+\end{align} 
+Taking the gradient of equation \ref{p3-eq-log-posterior} results in
+\begin{equation}
+    \nabla_{\beta} \log( p(\beta | y_1,...,y_n) ) = \sum_{i=1}^n \frac{1}{1 + \exp(x_i^\intercal\beta)} x_i + (y_i - 1) x_i.
+\end{equation}
+
+\paragraph{Acceptance Ratio Derivation.} 
+To fully specify MALA, we must calculate the acceptance ratio; for $\beta$ and a proposed $\beta'$
+\begin{equation} \label{p3-eq-acceptance-ratio}
+    \alpha_3
+    = \min\left\{1, \frac{p(\beta' | y_1,...,y_n) q(\beta | \beta')}{p(\beta | y_1,...,y_n) q(\beta' | \beta)} \right\} 
+    = \min\left\{1, \frac{p(y_1,...,y_n | \beta')}{p(y_1,...,y_n | \beta)}\right\}.
+\end{equation}
+For numerical stability, we compute $\log(\alpha_3)$ in our algorithm.
+
+\subsection{Results}
+Having derived the gradient term and acceptance ratio in equations \ref{p3-eq-log-posterior} and \ref{p3-eq-acceptance-ratio}, 
+we now present our numerical results.
+Our experiment parameters are summarized below.
+\begin{enumerate}
+    \item We range the number parameters, $p$, in the set $\{1, 10, 100\}$.
+    \item We range the number step size, $\lambda$, in the set $\{10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\}$.
+    \item For each $p$, $n=1000$ points are samples from the model, and $20000$ MALA steps were generated with $5000$ discarded as a burn in.  
+\end{enumerate}
+We implement the code for MALA in julia. The results of the experiment for MALA are in Table \ref{table-results-mala}, and the results for HMC are in \ref{table-results-HMC}.
+\begin{table}[ht]
+    \centering
+    \caption{Results for MALA. Going from left to right, the first table shows effective sample size, time (in seconds), and posterior bias ($||\beta_* - \hat{\beta}||_2^2$).}
+    \label{table-results-mala}
+    \footnotesize
+    \begin{tabular}{| c | c c c || c c c || c c c |} \toprule
+    Results MALA                    & & ESS &  &  & Time &  & & Posterior Bias &  \\ \midrule
+    $\lambda / p$                    & $p=1$ & $p = 10$ & $p = 100$ & $p=1$ & $p = 10$ & $p = 100$ & $p=1$ & $p = 10$ & $p = 100$ \\ \midrule 
+    $\lambda = 10^{-4}$   &  5.54     &    24.77      &     295.56      &   3.2   &   5.10    &    40.29  &     0.16     &    9.0      &  116.76 \\
+    $\lambda = 10^{-3}$   &  5.52    &    41.83      &    324.29      &   1.9    &  5.12     &   42.15  &     0.02     &      3.75    & 87.1162\\
+    $\lambda = 10^{-2}$   &  65.16     &  73.3       &    300.62       &   1.9    &  5.11     &   43.8   &     0.0003      &    0.25      & 8.16\\
+    $\lambda = 10^{-1}$   &  4832.35    &  2020.81        &   710.28        &   1.9    &  5.43     &   43.9   &     0.0005      &    0.23      & 8.11 \\\bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Results for HMS. Going from left to right, the first table shows effective sample size, time (in seconds), and posterior bias ($||\beta_* - \hat{\beta}||_2^2$).}
+    \label{table-results-HMC}
+    \footnotesize
+    \begin{tabular}{| c | c c c || c c c || c c c |} \toprule
+    Results HMC                    & & ESS &  &  & Time &  & & Posterior Bias &  \\ \midrule
+       & $p=1$ & $p = 10$ & $p = 100$ & $p=1$ & $p = 10$ & $p = 100$ & $p=1$ & $p = 10$ & $p = 100$ \\ \midrule 
+       &  4000     &   4000      &    4000      &    22.741  &   48.092    &  177.646    &  0.0004   &  0.23   & 144.79 \\\bottomrule
+    \end{tabular}
+\end{table}
+
+
 \end{document}
