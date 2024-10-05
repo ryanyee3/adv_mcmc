@@ -92,7 +92,8 @@ Our experiment parameters are summarized below.
 \begin{enumerate}
     \item We range the number parameters, $p$, in the set $\{1, 10, 100\}$.
     \item We range the number step size, $\lambda$, in the set $\{10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\}$.
-    \item For each $p$, $n=1000$ points are samples from the model, and $20000$ MALA steps were generated with $5000$ discarded as a burn in.  
+    \item For each $p$, $n=1000$ points are samples from the model, and $20000$ MALA steps were generated with $5000$ discarded as a burn in. 
+    For HMC, 4 chains were used, each taking $2000$ iterations. 
 \end{enumerate}
 We implement the code for MALA in julia. The results of the experiment for MALA are in Table \ref{table-results-mala}, and the results for HMC are in \ref{table-results-HMC}.
 \begin{table}[ht]
