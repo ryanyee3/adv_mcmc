@@ -47,6 +47,24 @@ Parameters: $\lambda, d, \theta \in\mathbb{R}^{d}$
     & \theta_{k+1} = \theta_{k} + \frac{1}{2}\lambda^{2} \nabla log(\pi(\theta_{k}) 
 \end{align}
 
+We tested our the performance of our MALA sampler on a grid of values of dimension $d = 1, 10, 100$ and step sizes $\lambda = 0.25, 0.5, 1, 2$.
+For each experiment, we used a burn-in period of 1000 iterations.
+We ran experiments where we kept 1000 to 10000 iterations, incremented by 1000.
+We evaluate the performance of our sampler using effective sample size (ESS) and the bias of the true mean and variance of the distribution.
+
+We find that our MALA sampler is sensitive to both $d$ and $\lambda$.
+Figure \ref{fig:mala_std_normal} provides a visualization of our results.
+When $d = 1$, larger step sizes tend to lead to higher ESS and reduced bias.
+However, as $d$ grows, smaller step sizes tend to lead to better sampling diagnostics.
+In general, our sampler struggles to fully explore the sample space in high dimensions, even with favorable hyperparameter settings.
+
+\begin{figure}
+\centering
+\includegraphics[width=.8\textwidth]{MALA_std_normal/mala_std_normal_diagnostics.png}
+\caption{Diagnostics of standard normal MALA sampler experiments.}
+\label{fig:mala_std_normal}
+\end{figure}
+
 \section{MALA for Bayesian Logistic Regression}
 
 \subsection{Derivations}
