@@ -95,8 +95,9 @@ where $\lambda$ is a hyperparameter specified by the user and often referred to 
 Below we derive the MALA sampler for this problem by computing the gradient of the log-prior:
 \begin{align}
 	\nabla \log(\pi(\theta_{k})) & = \nabla \left(-\log(c) - \frac{1}{2} ||\theta||_2^2 \right) \\
-	& = -\theta_{k}.
+	& = -\theta_{k}
 \end{align}
+where $c$ is a constant that does not depend on $\theta_{k}$.
 Thus, the update for our sampler is $$\theta_{k+1} = \theta_{k} \left(1 - \frac{\lambda^{2}}{2}\right).$$
 
 We tested our the performance of our MALA sampler on a grid of values of dimension $d = 1, 10, 100$ and step sizes $\lambda = 0.25, 0.5, 1, 2$.
