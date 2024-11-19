@@ -145,7 +145,7 @@ data <- gen_data(500, 5)
 sim1 <- run_sim(y = data$y, data_mat = data$data_mat, m = 50000)
 s_probs <- get_sim_post_prob(sim1)
 #posterior prob
-s_probs %>%
+s_probs <- s_probs %>%
   mutate(prob = n / 50000)
 # true S (non zero)
 sort(data$coef_index)
@@ -156,9 +156,40 @@ data10 <- gen_data(1000, 10)
 sim10 <- run_sim(y = data10$y, data_mat = data10$data_mat, m = 50000)
 s_probs10 <- get_sim_post_prob(sim10)
 #posterior prob
-s_probs10 %>%
+s_probs10  <- s_probs10 %>%
   mutate(prob = n / 50000)
 # true S (non zero)
 sort(data10$coef_index)
+
+```
+
+
+
+```{r}
+for (i in 1:nrow(s_probs)){
+  for (j in 1:ncol(s_probs)){
+      value = unname(unlist(s_probs[i, j]))
+      if (j == 7) {
+         value = round(unname(unlist(s_probs[i, j])), 3)
+         cat(value, " \\\\")
+      }
+      else cat(value, " & ")
+  }
+  cat("\n")
+}
+
+
+
+for (i in 1:8){
+  for (j in 1:ncol(s_probs10)){
+      value = unname(unlist(s_probs10[i, j]))
+      if (j == 12) {
+         value = round(unname(unlist(s_probs10[i, j])), 3)
+         cat(value, " \\\\")
+      }
+      else cat(value, " & ")
+  }
+  cat("\n")
+}
 ```
 
